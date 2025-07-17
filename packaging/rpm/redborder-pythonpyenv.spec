@@ -1,17 +1,21 @@
-Name:           redborder-pythonpyenv
-Version:        3.10.14
-Release:        1%{?dist}
-Summary:        Python 3.10 with pyenv in /opt/redborder/pyenv
-License:        MIT
-BuildArch:      noarch
+%define debug_package %{nil}
 
-BuildRequires:  gcc, make, zlib-devel, bzip2-devel, readline-devel, sqlite-devel, \
-                openssl-devel, xz-devel, libffi-devel, git, curl
+%global pyenv_root %{__pyenv_root}
+%global python_version %{__python_version}
+
+%undefine __brp_mangle_shebangs
+
+Name: redborder-pythonpyenv
+Version: %{__version}
+Release: %{__release}%{?dist}
+Summary: Python 3.10 with pyenv in /opt/redborder/pyenv
+License: MIT
+ExclusiveArch: x86_64
+Summary: This package installs pyenv and Python through pyenv.
+
+BuildRequires:  gcc, make, zlib-devel, bzip2-devel, readline-devel, sqlite-devel, openssl-devel, xz-devel, libffi-devel, git, curl
 
 Requires:       bash
-
-%define pyenv_root /opt/redborder/pyenv
-%define python_version 3.10.14
 
 %description
 This package installs pyenv into %{pyenv_root} and installs Python %{python_version} through pyenv.
