@@ -1,5 +1,7 @@
 %define debug_package %{nil}
 
+%global __requires_exclude ^/usr/local/bin/python$
+
 %global pyenv_root %{__pyenv_root}
 %global python_version %{__python_version}
 
