@@ -6,6 +6,8 @@ BUILD_NUMBER?= 1
 
 MOCK_CONFIG?= default
 
+RESULT_DIR?= pkgs
+
 PYTHON_VERSION?= 3.10.14
 
 PYENV_ROOT?= /opt/redborder/pyenv
