@@ -1,47 +1,58 @@
-Name:           redborder-pythonpyenv
-Version:        3.10.14
-Release:        1%{?dist}
-Summary:        Python 3.10 with pyenv in /opt/redborder/pyenv
-License:        MIT
-BuildArch:      noarch
+PACKAGE_NAME?=	redborder-pythonpyenv
 
-BuildRequires:  gcc, make, zlib-devel, bzip2-devel, readline-devel, sqlite-devel, \
-                openssl-devel, xz-devel, libffi-devel, git, curl
+VERSION?=	$(shell git describe --abbrev=6 --tags HEAD --always | sed 's/-/_/g')
 
-Requires:       bash
+BUILD_NUMBER?= 1
 
-%define pyenv_root /opt/redborder/pyenv
-%define python_version 3.10.14
+MOCK_CONFIG?= default
 
-%description
-This package installs pyenv into %{pyenv_root} and installs Python %{python_version} through pyenv.
+PYTHON_VERSION?= 3.10.14
 
-%prep
-# No unpacking needed if you use install-python.sh
+PYENV_ROOT?= /opt/redborder/pyenv
 
-%build
-mkdir -p %{pyenv_root}
-export PYENV_ROOT=%{pyenv_root}
-export PATH="$PYENV_ROOT/bin:$PATH"
+all: rpm
 
-# Clonar pyenv en buildroot
-git clone https://github.com/pyenv/pyenv.git %{pyenv_root}
 
-# Instalar Python con pyenv
-eval "$(%{pyenv_root}/bin/pyenv init -)"
-%{pyenv_root}/bin/pyenv install %{python_version}
-%{pyenv_root}/bin/pyenv global %{python_version}
+SOURCES:
+	mkdir -p SOURCES
 
-# Verifica instalación
-%{pyenv_root}/versions/%{python_version}/bin/python3 --version
+archive: SOURCES
+	cd ../../ && \
+	git archive --prefix=$(PACKAGE_NAME)-$(VERSION)/ \
+		-o packaging/rpm/SOURCES/$(PACKAGE_NAME)-$(VERSION).tar.gz HEAD
 
-%install
-mkdir -p %{buildroot}%{pyenv_root}
-cp -a %{pyenv_root}/* %{buildroot}%{pyenv_root}/
 
-%files
-%{pyenv_root}
+build_prepare: archive
+	mkdir -p $(RESULT_DIR)
+	rm -f $(RESULT_DIR)/$(PACKAGE_NAME)*.rpm
 
-%changelog
-* Thu Jul 17 2025 Miguel N. <manegron@email> - 0.0.1
-- Instala pyenv y Python 3.10.14 en /opt/redborder/pyenv
+srpm: build_prepare
+	/usr/bin/mock \
+		-r $(MOCK_CONFIG) \
+		--define "__version $(VERSION)" \
+		--define "__release $(BUILD_NUMBER)" \
+		--define "__pyenv_root $(PYENV_ROOT)" \
+		--define "__python_version $(PYTHON_VERSION)" \
+		--resultdir=$(RESULT_DIR) \
+		--buildsrpm \
+		--spec=${PACKAGE_NAME}.spec \
+		--sources=SOURCES
+	@echo "======= Source RPM now available in $(RESULT_DIR) ======="
+
+rpm: srpm
+	/usr/bin/mock \
+		-r $(MOCK_CONFIG) \
+		--define "__version $(VERSION)"\
+		--define "__release $(BUILD_NUMBER)"\
+		--define "__pyenv_root $(PYENV_ROOT)" \
+		--define "__python_version $(PYTHON_VERSION)" \
+		--resultdir=$(RESULT_DIR) \
+		--rebuild $(RESULT_DIR)/$(PACKAGE_NAME)*.src.rpm
+	@echo "======= Binary RPMs now available in $(RESULT_DIR) ======="
+
+clean:
+	rm -rf SOURCES pkgs
+
+distclean: clean
+	rm -f build.log root.log state.log available_pkgs installed_pkgs \
+		*.rpm *.tar.gz
