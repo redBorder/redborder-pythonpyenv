@@ -95,9 +95,6 @@ $PYTHON_BIN -m virtualenv %{redborder_agents_venv_path}
 # Install from source to avoid problems
 %{redborder_agents_venv_path}/bin/pip install --no-binary=:all: numpy scipy
 
-# Install crewai
-# %{redborder_agents_venv_path}/bin/pip install "crewai[tools,web]"
-
 # Install redborder-agents dependencies
 %{redborder_agents_venv_path}/bin/pip install -r $RPM_SOURCE_DIR/redborder-agents_requirements.txt
 
