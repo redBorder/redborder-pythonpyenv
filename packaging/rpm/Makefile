@@ -8,7 +8,7 @@ MOCK_CONFIG?= default
 
 RESULT_DIR?= pkgs
 
-PYTHON_VERSION?= 3.10.14
+PYTHON_VERSION?= 3.11.13
 
 PYENV_ROOT?= /opt/redborder/pyenv
 
@@ -17,7 +17,7 @@ all: rpm
 
 SOURCES:
 	mkdir -p SOURCES
-
+	
 archive: SOURCES
 	cd ../../ && \
 	git archive --prefix=$(PACKAGE_NAME)-$(VERSION)/ \
@@ -27,6 +27,7 @@ archive: SOURCES
 build_prepare: archive
 	mkdir -p $(RESULT_DIR)
 	rm -f $(RESULT_DIR)/$(PACKAGE_NAME)*.rpm
+	cp *_requirements.txt SOURCES
 
 srpm: build_prepare
 	/usr/bin/mock \
