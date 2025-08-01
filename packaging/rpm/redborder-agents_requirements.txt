@@ -95,6 +95,7 @@ crewai[tools]==0.150.0
 crewai-tools[mcp]==0.58.0
     # via
     #   crewai
+    #   crewai-tools
     #   redborder_agents (pyproject.toml)
 cryptography==45.0.5
     # via pdfminer-six
