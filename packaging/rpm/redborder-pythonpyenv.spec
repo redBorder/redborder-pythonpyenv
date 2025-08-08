@@ -9,6 +9,9 @@
 %global __requires_exclude_from %{__pyenv_root}/envs/crewai/lib/.*\.so.*$
 %global __requires_exclude_from %{redborder_agents_dir}/venv/lib/.*\.so.*$
 
+%define __provides_exclude_from ^%{pyenv_root}/.*
+%define __requires_exclude_from ^%{pyenv_root}/.*
+
 %undefine __brp_mangle_shebangs
 
 Name: redborder-pythonpyenv
