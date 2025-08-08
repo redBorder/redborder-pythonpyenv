@@ -5,12 +5,13 @@
 %global redborder_agents_dir /opt/redborder-agents
 %global redborder_agents_venv_path %{redborder_agents_dir}/venv
 
-%global __requires_exclude ^/usr/local/bin/python$
-%global __requires_exclude_from %{__pyenv_root}/envs/crewai/lib/.*\.so.*$
-%global __requires_exclude_from %{redborder_agents_dir}/venv/lib/.*\.so.*$
+%global __provides_exclude ^python3$
+%global __provides_exclude_from ^%{pyenv_root}/.*
+%global __requires_exclude ^python3$
+%global __requires_exclude_from ^%{pyenv_root}/.*
 
-%define __provides_exclude_from ^%{pyenv_root}/.*
-%define __requires_exclude_from ^%{pyenv_root}/.*
+%global __provides_exclude_from ^%{redborder_agents_dir}/.*
+%global __requires_exclude_from ^%{redborder_agents_dir}/.*
 
 %undefine __brp_mangle_shebangs
 
@@ -113,7 +114,7 @@ deactivate
 %install
 mkdir -p %{buildroot}%{pyenv_root}
 cp -a %{pyenv_root}/. %{buildroot}%{pyenv_root}/
-mkdir -p {buildroot}%{redborder_agents_dir}
+mkdir -p %{buildroot}%{redborder_agents_dir}
 cp -a %{redborder_agents_dir}/. %{buildroot}%{redborder_agents_dir}/
 
 %files
