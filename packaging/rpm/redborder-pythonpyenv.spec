@@ -13,6 +13,8 @@
 %global __provides_exclude_from ^%{redborder_agents_dir}/.*
 %global __requires_exclude_from ^%{redborder_agents_dir}/.*
 
+%global __requires_exclude ^/usr/local/bin/python$
+
 %undefine __brp_mangle_shebangs
 
 Name: redborder-pythonpyenv
