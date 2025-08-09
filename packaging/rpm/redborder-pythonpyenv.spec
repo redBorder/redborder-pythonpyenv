@@ -15,8 +15,9 @@
 
 %global __requires_exclude ^/usr/local/bin/python$
 
-%global __provides_exclude_from libpython3.*
-%global __provides_exclude_from libsqlite3.*
+%global __provides_exclude libpython3.11.so.1.0
+%global __provides_exclude libpython3.so
+%global __provides_exclude libsqlite3.*
 
 
 %undefine __brp_mangle_shebangs
