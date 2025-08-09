@@ -15,6 +15,10 @@
 
 %global __requires_exclude ^/usr/local/bin/python$
 
+%global __provides_exclude_from libpython3.*
+%global __provides_exclude_from libsqlite3.*
+
+
 %undefine __brp_mangle_shebangs
 
 Name: redborder-pythonpyenv
