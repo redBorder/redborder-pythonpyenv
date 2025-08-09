@@ -5,23 +5,16 @@
 %global redborder_agents_dir /opt/redborder-agents
 %global redborder_agents_venv_path %{redborder_agents_dir}/venv
 
-%global __provides_exclude ^python3$
-%global __provides_exclude_from ^%{pyenv_root}/.*
+%global __provides_exclude ^python3$|libpython3\.11\.so\.1\.0.*|libpython3\.so.*|libsqlite3.*
+
+%global __provides_exclude_from %{pyenv_root}/.*|%{redborder_agents_dir}/.*
+
 %global __requires_exclude ^python3$
-%global __requires_exclude_from ^%{pyenv_root}/.*
 
-%global __provides_exclude_from ^%{redborder_agents_dir}/.*
-%global __requires_exclude_from ^%{redborder_agents_dir}/.*
-
-%global __requires_exclude ^/usr/local/bin/python$
-
-%global __provides_exclude libpython3\.11\.so\.1\.0|libpython3\.so
-%global __provides_exclude libsqlite3.*
-
-%global __provides_exclude_from /opt/redborder/pyenv/versions/3.11.13/lib/libpython3\.11\.so\.1\.0|/opt/redborder/pyenv/versions/3.11.13/lib/libpython3\.so
+%global __requires_exclude_from %{pyenv_root}/.*|%{redborder_agents_dir}/.*
 
 %undefine __brp_mangle_shebangs
-
+ 
 Name: redborder-pythonpyenv
 Version: %{__version}
 Release: %{__release}%{?dist}
@@ -129,6 +122,9 @@ cp -a %{redborder_agents_dir}/. %{buildroot}%{redborder_agents_dir}/
 %{redborder_agents_venv_path}
 
 %changelog
+* Sat Aug 9 2025 manegron <manegron@email>
+- Excluir algunas librerias internas como provides 
+
 * Thu Jul 17 2025 manegron <manegron@email>
 - Instala redborder-agents y dependencias en virtualenv aislada, y python 3.11
 
