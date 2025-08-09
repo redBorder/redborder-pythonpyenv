@@ -18,6 +18,7 @@
 %global __provides_exclude libpython3\.11\.so\.1\.0|libpython3\.so
 %global __provides_exclude libsqlite3.*
 
+%global __provides_exclude_from /opt/redborder/pyenv/versions/3.11.13/lib/libpython3\.11\.so\.1\.0|/opt/redborder/pyenv/versions/3.11.13/lib/libpython3\.so
 
 %undefine __brp_mangle_shebangs
 
