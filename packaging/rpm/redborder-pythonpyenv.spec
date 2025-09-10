@@ -25,8 +25,7 @@ ExclusiveArch: x86_64
 Source0: redborder-agents_requirements.txt
 Source1: mcp-server-webui_requirements.txt
 
-BuildRequires: gcc, gcc-c++, make, zlib-devel, bzip2-devel, readline-devel, sqlite-devel, openssl-devel, xz-devel, libffi-devel, git, curl, autoconf, automake, libtool, gcc-gfortran, autoconf, openblas-devel
-
+BuildRequires: gcc, gcc-c++, make, zlib-devel, bzip2-devel, readline-devel, sqlite-devel, openssl-devel, xz-devel, libffi-devel, git, curl, autoconf, automake, libtool, gcc-gfortran, openblas-devel
 Requires: bash, openblas-devel
 
 %description
@@ -58,58 +57,35 @@ cd ..
 
 # Exportar variables de compilación
 export CPPFLAGS="-I$SQLITE_PREFIX/include"
-export LDFLAGS="-L$SQLITE_PREFIX/lib"
+export LDFLAGS="-L$SQLITE_PREFIX/lib -Wl,-rpath,$SQLITE_PREFIX/lib"
 export LD_RUN_PATH="$SQLITE_PREFIX/lib"
 export PKG_CONFIG_PATH="$SQLITE_PREFIX/lib/pkgconfig"
+export CONFIGURE_OPTS="--with-ensurepip=install --enable-loadable-sqlite-extensions"
 export MAKE_OPTS="-j$(nproc)"
 
-# Forzar rpath para encontrar libsqlite en tiempo de ejecución
-export CONFIGURE_OPTS="--with-ensurepip=install --enable-loadable-sqlite-extensions"
-
-# Inicializar pyenv y compilar Python
+# Compilar Python con pyenv
 eval "$(%{pyenv_root}/bin/pyenv init -)"
-env \
-  CPPFLAGS="$CPPFLAGS" \
-  LDFLAGS="$LDFLAGS -Wl,-rpath,$SQLITE_PREFIX/lib" \
-  PKG_CONFIG_PATH="$PKG_CONFIG_PATH" \
-  CONFIGURE_OPTS="$CONFIGURE_OPTS" \
-  MAKE_OPTS="$MAKE_OPTS" \
-  %{pyenv_root}/bin/pyenv install %{python_version}
-
-# Usar la versión compilada
+%{pyenv_root}/bin/pyenv install %{python_version}
 %{pyenv_root}/bin/pyenv global %{python_version}
-
 PYTHON_BIN=%{pyenv_root}/versions/%{python_version}/bin/python3
 
 # Preparar entorno virtual
-$PYTHON_BIN -m ensurepip
-$PYTHON_BIN -m pip install --upgrade pip setuptools virtualenv
-
-# Create redborder-agents venv and install dependencies
+$PYTHON_BIN -m pip install --upgrade pip setuptools virtualenv wheel
 mkdir -p %{redborder_agents_dir}
+$PYTHON_BIN -m venv %{redborder_agents_venv_path}
 
-# Create reborder-agents venv
-$PYTHON_BIN -m virtualenv %{redborder_agents_venv_path}
-
-# Activate venv and install packages
-. %{redborder_agents_venv_path}/bin/activate
-
-%{redborder_agents_venv_path}/bin/pip install --upgrade pip setuptools
-
-# Install from source to avoid problems
-%{redborder_agents_venv_path}/bin/pip install --no-binary=:all: numpy scipy
+# Instalar dependencias
+%{redborder_agents_venv_path}/bin/pip install --upgrade pip setuptools wheel
+%{redborder_agents_venv_path}/bin/pip install numpy scipy
 
 # Install redborder-agents dependencies
-%{redborder_agents_venv_path}/bin/pip install -r $RPM_SOURCE_DIR/redborder-agents_requirements.txt
-
+%{redborder_agents_venv_path}/bin/pip install --no-deps -r $RPM_SOURCE_DIR/redborder-agents_requirements.txt
 # Install webui mcp server dependencies
-%{redborder_agents_venv_path}/bin/pip install -r $RPM_SOURCE_DIR/mcp-server-webui_requirements.txt
+%{redborder_agents_venv_path}/bin/pip install --no-deps -r $RPM_SOURCE_DIR/mcp-server-webui_requirements.txt
 
 # Verificar SQLite y crewai
-%{redborder_agents_venv_path}/bin/python -c "import sqlite3; print(sqlite3.sqlite_version)"
-%{redborder_agents_venv_path}/bin/python -c "import crewai; print('CrewAI version:', crewai.__version__)"
-
-deactivate
+%{redborder_agents_venv_path}/bin/python -c "import sqlite3; print('SQLite:', sqlite3.sqlite_version)"
+%{redborder_agents_venv_path}/bin/python -c "import crewai; print('CrewAI:', crewai.__version__)"
 
 %install
 mkdir -p %{buildroot}%{pyenv_root}
@@ -122,6 +98,9 @@ cp -a %{redborder_agents_dir}/. %{buildroot}%{redborder_agents_dir}/
 %{redborder_agents_venv_path}
 
 %changelog
+* Wed Sep 10 2025 Rafael Gómez <rgomez@redborder.com>
+- Improve performance of RPM builiding
+
 * Sat Aug 9 2025 manegron <manegron@email>
 - Excluir algunas librerias internas como provides 
 
