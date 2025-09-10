@@ -1,9 +1,13 @@
 %define debug_package %{nil}
+%global __brp_strip %{nil}
 
 %global pyenv_root %{__pyenv_root}
 %global python_version %{__python_version}
 %global redborder_agents_dir /opt/redborder-agents
 %global redborder_agents_venv_path %{redborder_agents_dir}/venv
+
+%global airflow_dir /opt/airflow
+%global airflow_venv_path %{airflow_dir}/venv
 
 %global __provides_exclude ^python3$|libpython3\.11\.so\.1\.0.*|libpython3\.so.*|libsqlite3.*
 
@@ -12,6 +16,10 @@
 %global __requires_exclude ^python3$
 
 %global __requires_exclude_from %{pyenv_root}/.*|%{redborder_agents_dir}/.*
+
+%global __provides_exclude_from %{pyenv_root}/.*|%{airflow_dir}/.*
+
+%global __requires_exclude_from %{pyenv_root}/.*|%{airflow_dir}/.*
 
 %undefine __brp_mangle_shebangs
  
@@ -24,8 +32,9 @@ ExclusiveArch: x86_64
 
 Source0: redborder-agents_requirements.txt
 Source1: mcp-server-webui_requirements.txt
+Source2: airflow_requirements.txt
 
-BuildRequires: gcc, gcc-c++, make, zlib-devel, bzip2-devel, readline-devel, sqlite-devel, openssl-devel, xz-devel, libffi-devel, git, curl, autoconf, automake, libtool, gcc-gfortran, autoconf, openblas-devel
+BuildRequires: gcc, gcc-c++, make, zlib-devel, bzip2-devel, readline-devel, sqlite-devel, openssl-devel, xz-devel, libffi-devel, git, curl, autoconf, automake, libtool, gcc-gfortran, autoconf, openblas-devel, wget, unzip, findutils, libvirt-devel, pkgconfig, krb5-devel, mariadb-devel, graphviz-devel, openldap-devel
 
 Requires: bash, openblas-devel
 
@@ -111,22 +120,42 @@ $PYTHON_BIN -m virtualenv %{redborder_agents_venv_path}
 
 deactivate
 
+# Create airflow venv and install dependencies
+mkdir -p %{airflow_dir}
+
+# Create airflow venv
+$PYTHON_BIN -m virtualenv %{airflow_venv_path}
+
+# Activate venv and install packages
+. %{airflow_venv_path}/bin/activate
+
+# Install airflow dependencies
+%{airflow_venv_path}/bin/pip install -r $RPM_SOURCE_DIR/airflow_requirements.txt
+
+deactivate
+
 %install
 mkdir -p %{buildroot}%{pyenv_root}
 cp -a %{pyenv_root}/. %{buildroot}%{pyenv_root}/
 mkdir -p %{buildroot}%{redborder_agents_dir}
 cp -a %{redborder_agents_dir}/. %{buildroot}%{redborder_agents_dir}/
+mkdir -p %{buildroot}%{airflow_dir}
+cp -a %{airflow_dir}/. %{buildroot}%{airflow_dir}/
 
 %files
 %{pyenv_root}
 %{redborder_agents_venv_path}
+%{airflow_venv_path}
 
 %changelog
-* Sat Aug 9 2025 manegron <manegron@email>
+* Tue Sep 09 2025 Vicente Mesa <vimesa@redborder.com>
+- Add airflow venv
+
+* Sat Aug 9 2025 manegron <manegron@redborder.com>
 - Excluir algunas librerias internas como provides 
 
-* Thu Jul 17 2025 manegron <manegron@email>
+* Thu Jul 17 2025 manegron <manegron@redborder.com>
 - Instala redborder-agents y dependencias en virtualenv aislada, y python 3.11
 
-* Thu Jul 17 2025 manegron <manegron@email>
+* Thu Jul 17 2025 manegron <manegron@redborder.com>
 - Instala pyenv y Python 3.10.14 en /opt/redborder/pyenv
