@@ -4,17 +4,14 @@
 %global python_version %{__python_version}
 %global redborder_agents_dir /opt/redborder-agents
 %global redborder_agents_venv_path %{redborder_agents_dir}/venv
+%global redborder_agents_webui_venv_path %{redborder_agents_dir}/src/redborder_agents/servers/webui/venv
 
 %global __provides_exclude ^python3$|libpython3\.11\.so\.1\.0.*|libpython3\.so.*|libsqlite3.*
-
 %global __provides_exclude_from %{pyenv_root}/.*|%{redborder_agents_dir}/.*
-
 %global __requires_exclude ^python3$
-
 %global __requires_exclude_from %{pyenv_root}/.*|%{redborder_agents_dir}/.*
-
 %undefine __brp_mangle_shebangs
- 
+
 Name: redborder-pythonpyenv
 Version: %{__version}
 Release: %{__release}%{?dist}
@@ -29,7 +26,8 @@ BuildRequires: gcc, gcc-c++, make, zlib-devel, bzip2-devel, readline-devel, sqli
 Requires: bash, openblas-devel
 
 %description
-This package installs pyenv into %{pyenv_root}, Python %{python_version}, and a virtualenv with crewai and dependencies.
+This package installs pyenv into %{pyenv_root}, Python %{python_version}, 
+and two virtualenvs: one for redborder-agents and another for the webui MCP server.
 
 %prep
 # No source to unpack
@@ -70,22 +68,30 @@ eval "$(%{pyenv_root}/bin/pyenv init -)"
 PYTHON_BIN=%{pyenv_root}/versions/%{python_version}/bin/python3
 
 # Preparar entorno virtual
-$PYTHON_BIN -m pip install --upgrade pip setuptools virtualenv wheel
+$PYTHON_BIN -m pip install --upgrade pip setuptools virtualenv
+
+# =====================
+# VENV redborder-agents
+# =====================
 mkdir -p %{redborder_agents_dir}
 $PYTHON_BIN -m venv %{redborder_agents_venv_path}
-
-# Instalar dependencias
-%{redborder_agents_venv_path}/bin/pip install --upgrade pip setuptools wheel
-%{redborder_agents_venv_path}/bin/pip install numpy scipy
-
-# Install redborder-agents dependencies
+%{redborder_agents_venv_path}/bin/pip install --upgrade pip setuptools
 %{redborder_agents_venv_path}/bin/pip install --no-deps -r $RPM_SOURCE_DIR/redborder-agents_requirements.txt
-# Install webui mcp server dependencies
-%{redborder_agents_venv_path}/bin/pip install --no-deps -r $RPM_SOURCE_DIR/mcp-server-webui_requirements.txt
 
 # Verificar SQLite y crewai
 %{redborder_agents_venv_path}/bin/python -c "import sqlite3; print('SQLite:', sqlite3.sqlite_version)"
 %{redborder_agents_venv_path}/bin/python -c "import crewai; print('CrewAI:', crewai.__version__)"
+
+# =====================
+# VENV webui MCP server
+# =====================
+mkdir -p $(dirname %{redborder_agents_webui_venv_path})
+$PYTHON_BIN -m venv %{redborder_agents_webui_venv_path}
+%{redborder_agents_webui_venv_path}/bin/pip install --upgrade pip setuptools
+%{redborder_agents_webui_venv_path}/bin/pip install --no-deps -r $RPM_SOURCE_DIR/mcp-server-webui_requirements.txt
+
+# Verificar MCP
+%{redborder_agents_webui_venv_path}/bin/python -c "import mcp; print('MCP:', mcp.__version__)"
 
 %install
 mkdir -p %{buildroot}%{pyenv_root}
@@ -96,6 +102,7 @@ cp -a %{redborder_agents_dir}/. %{buildroot}%{redborder_agents_dir}/
 %files
 %{pyenv_root}
 %{redborder_agents_venv_path}
+%{redborder_agents_webui_venv_path}
 
 %changelog
 * Wed Sep 10 2025 Rafael Gómez <rgomez@redborder.com>
