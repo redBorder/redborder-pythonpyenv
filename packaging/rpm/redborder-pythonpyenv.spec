@@ -2,9 +2,13 @@
 
 %global pyenv_root %{__pyenv_root}
 %global python_version %{__python_version}
+
+# =====================
+# redborder-agents
+# =====================
 %global redborder_agents_dir /opt/redborder-agents
 %global redborder_agents_venv_path %{redborder_agents_dir}/venv
-%global redborder_agents_webui_venv_path %{redborder_agents_dir}/src/redborder_agents/servers/webui/venv
+%global redborder_agents_webui_venv_path %{redborder_agents_dir}/src/redborder_agents/servers/webui/.venv
 
 %global __provides_exclude ^python3$|libpython3\.11\.so\.1\.0.*|libpython3\.so.*|libsqlite3.*
 %global __provides_exclude_from %{pyenv_root}/.*|%{redborder_agents_dir}/.*
@@ -26,8 +30,7 @@ BuildRequires: gcc, gcc-c++, make, zlib-devel, bzip2-devel, readline-devel, sqli
 Requires: bash, openblas-devel
 
 %description
-This package installs pyenv into %{pyenv_root}, Python %{python_version}, 
-and two virtualenvs: one for redborder-agents and another for the webui MCP server.
+This package installs pyenv into %{pyenv_root}, Python %{python_version}, and two virtualenvs: one for redborder-agents and another for the webui MCP server.
 
 %prep
 # No source to unpack
@@ -91,7 +94,7 @@ $PYTHON_BIN -m venv %{redborder_agents_webui_venv_path}
 %{redborder_agents_webui_venv_path}/bin/pip install --no-deps -r $RPM_SOURCE_DIR/mcp-server-webui_requirements.txt
 
 # Verificar MCP
-%{redborder_agents_webui_venv_path}/bin/python -c "import mcp; print('MCP:', mcp.__version__)"
+%{redborder_agents_webui_venv_path}/bin/python -c "import importlib.metadata; print('MCP:', importlib.metadata.version('mcp'))"
 
 %install
 mkdir -p %{buildroot}%{pyenv_root}
@@ -106,7 +109,7 @@ cp -a %{redborder_agents_dir}/. %{buildroot}%{redborder_agents_dir}/
 
 %changelog
 * Wed Sep 10 2025 Rafael Gómez <rgomez@redborder.com>
-- Improve performance of RPM builiding
+- Improve performance of RPM builiding and split up redborder-agents venv
 
 * Sat Aug 9 2025 manegron <manegron@email>
 - Excluir algunas librerias internas como provides 
