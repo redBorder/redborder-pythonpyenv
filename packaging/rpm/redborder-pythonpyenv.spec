@@ -45,9 +45,9 @@ Source0: redborder-agents_requirements.txt
 Source1: mcp-server-webui_requirements.txt
 Source2: airflow_requirements.txt
 
-BuildRequires: gcc, gcc-c++, make, zlib-devel, bzip2-devel, readline-devel, sqlite-devel, openssl-devel, xz-devel, libffi-devel, git, curl, autoconf, automake, libtool, gcc-gfortran, autoconf, openblas-devel, wget, unzip, findutils, libvirt-devel, pkgconfig, krb5-devel, mariadb-devel, graphviz-devel, openldap-devel
+BuildRequires: gcc, gcc-c++, make, zlib-devel, bzip2-devel, readline-devel, sqlite-devel, openssl-devel, xz-devel, libffi-devel, git, curl, autoconf, automake, libtool, gcc-gfortran, openblas-devel, libjpeg-turbo-devel, libtiff-devel, libpng-devel, arrow-devel, parquet-devel, wget, unzip, findutils, libvirt-devel, pkgconfig, krb5-devel, mariadb-devel, graphviz-devel, openldap-devel
 
-Requires: bash, openblas-devel
+Requires: bash, openblas-devel, python3-numpy, python3-pillow, python3-pyarrow, python3-pandas, python3-scipy
 
 %description
 This package installs pyenv into %{pyenv_root}, Python %{python_version}, and two virtualenvs: one for redborder-agents and another for the webui MCP server.
@@ -138,7 +138,7 @@ cp -a %{airflow_dir}/. %{buildroot}%{airflow_dir}/
 %{airflow_venv_path}
 
 %changelog
-* Tue Sep 09 2025 Vicente Mesa <vimesa@redborder.com>
+* Tue Sep 15 2025 Vicente Mesa <vimesa@redborder.com>
 - Add airflow venv
 
 * Wed Sep 10 2025 Rafael Gómez <rgomez@redborder.com>
